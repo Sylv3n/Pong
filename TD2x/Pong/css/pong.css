@@ -1,0 +1,22 @@
+table
+{
+    border-collapse: collapse;
+    position:absolute;
+    top:50%;
+    left:3%;
+    width: 30%;
+}
+td, th, thead /* Mettre une bordure sur les td ET les th */
+{
+    border: 1px solid black;
+}
+
+td
+{
+    text-align: center;
+}
+
+caption
+{
+    font-size: large;
+}

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <title>Jeux du Pong</title>
+    <link rel="stylesheet" type="text/css" href="/css/pong.css" />
+  </head>
+
+
+  <body>
+
+    <table>
+      <caption>Keys accredited to each player</caption>
+
+      <tr>
+        <th>Keys/players</th>
+        <th>Player 1</th>
+        <th>Player 2</th>
+        <th>Player 3</th>
+        <th>Player 4</th>
+      </tr>
+      
+      <tr>
+        <th>Go Up</th>
+        <td>&</td>
+        <td>s</td>
+        <td>p</td>
+        <td>&uarr;</td>
+      </tr>
+
+      <tr>
+        <th>Go Down</th>
+        <td>a</td>
+        <td>w</td>
+        <td>l</td>
+        <td>&darr;</td>
+      </tr>
+    </table>
+
+  </body>
+
+  
+  <script src="./js/game.js"></script>
+  <script src="./js/game.display.js"></script>
+  <script src="./js/game.keycode.js"></script>
+  <script src="./js/game.control.js"></script>
+  <script src="./js/game.ai.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+
+  <script>
+
+    (function () {
+
+      // Create socket
+      const socket = io()
+      game.socket = socket;
+
+      // début du code isolé
+      var requestAnimId;
+        
+      var initialisation = function() {
+        // le code de l'initialisation
+        //game.init();
+        //requestAnimId = window.requestAnimationFrame(main); // premier appel de main au rafraîchissement de la page
+      }
+      
+      
+      //Game initialization
+      socket.on('initialization', function(signal) {
+        if(game.launched === false) {
+          game.playerID = socket.id;
+          game.initialization(signal)
+          requestAnimId = window.requestAnimationFrame(main); // premier appel de main au rafraîchissement de la page	
+        }
+      });
+      
+      
+      //Ball movement
+      socket.on('ball', function(signal) {			
+        game.ball.move(signal);
+      });
+      
+
+      //Displacements management
+      socket.on('infoPlayers', function(signal) {		
+        game.movePlayers(signal)
+          
+        if(game.AiFile[0] !== undefined && game.AiFile[0].activated === true) {
+          game.AiFile[0].move();
+        }
+
+        if(game.AiFile[1] !== undefined && game.AiFile[1].activated === true) {
+          game.AiFile[1].move();
+        }
+
+        if( game.AiFile[2] !== undefined && game.AiFile[2].activated === true) {
+          game.AiFile[2].move();			
+        }
+
+        socket.emit('movePlayers',game.playersCoordinates());
+      });
+
+      
+      //Disable AI
+      socket.on('shutdownIAReturn', function(signal) {	
+        game.control.shutdownIA(signal[0]);
+        game.deactivatePlayers(signal[1]);
+      });
+
+
+      //Refresh score
+      socket.on('score', function(signal) {
+        game.scoreChange(signal);
+      });
+ 
+      
+
+      //Main
+      function main () {
+        // le code du jeu
+        game.clearLayer(game.playersBallLayer);
+        game.displayPlayers();
+        game.displayBall();
+        //game.movePlayers();        
+        //game.moveBall();
+        //game.ai.move();
+        //game.collideBallWithPlayersAndAction(); 
+        requestAnimId = window.requestAnimationFrame(main);
+      }
+        
+      window.onload = initialisation; // appel de la fonction initialisation au chargement de la page
+      // fin du code isolé
+      
+    })();
+      
+  </script>
+
+</html>
+
+
+
